@@ -8,8 +8,7 @@
 import numpy as np
 import h5py
 import sys 
-auxdir="/dss/dsshome1/0D/di76rir/lib/MyPythonScripts/W2dynamics/General"
-sys.path.insert(0,auxdir)
+sys.path.insert(0,sys.argv[0].replace('/InputOutputManipulators/giw_trace.py','/General'))
 import hdf5_stuff as h5s
 import custom_errors as err
 import readwrite as rw

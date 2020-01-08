@@ -8,8 +8,7 @@ import sys
 import os
 import argparse
 import h5py as hdf5
-auxdir="/dss/dsshome1/0D/di76rir/lib/MyPythonScripts/W2dynamics/General"
-sys.path.insert(0,auxdir)
+sys.path.insert(0,sys.argv[0].replace('/InputOutputManipulators/rotate_objects.py','/General'))
 import readwrite as rw 
 import custom_errors as err 
 

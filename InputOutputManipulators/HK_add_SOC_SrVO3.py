@@ -3,8 +3,7 @@ import h5py as hdf5
 import numpy as np
 import sys
 ### here we need to add the path to the w2dynamics main directory
-auxdir="/dss/dsshome1/0D/di76rir/lib/MyPythonScripts/W2dynamics/General"
-sys.path.insert(0,auxdir)
+sys.path.insert(0,sys.argv[0].replace('/InputOutputManipulators/HK_add_SOC_SrVO3.py','/General'))
 ### in order to import the functions available in input.py
 import readwrite as rw
 import argparse

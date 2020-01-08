@@ -9,8 +9,7 @@ import h5py
 import matplotlib.cm as colormap
 import matplotlib.colors as mcolors 
 from collections import OrderedDict ### here we need to add the path to the personal myfunc directory (location of some read functions)
-auxdir="/dss/dsshome1/0D/di76rir/lib/MyPythonScripts/W2dynamics/General"
-sys.path.insert(0,auxdir)
+sys.path.insert(0,sys.argv[0].replace('/InputOutputManipulators/generate_maxent_plots.py','/General'))
 ### in order to import the functions available in input.py and interatction.py and readwrite and custom errors
 import readwrite as rw 
 import custom_errors as err 
