@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+
+import numpy as np
+import h5py
+import argparse
+import os
+
+parser = argparse.ArgumentParser(description='This script copies all input and the last iteration \
+                                              from the source file into the destination file. If the \
+                                              source file does not contain the finish group then the \
+                                              second to last written iteration will be copied.')
+parser.add_argument('source', help='This is the source file. It will not be changed.')
+parser.add_argument('dest', help='This is the destination file which will be generated and contain \
+                                  everthing from the source file except all but the last iteration.')
+args = parser.parse_args()
+sourcefile = args.source
+destfile = args.dest
+if sourcefile == destfile:
+    raise RuntimeError('Source and destination equal. Please specify another destination.')
+
+with h5py.File(sourcefile,'r') as oldfile:
+        with h5py.File(destfile,'w') as newfile:
+            maxiter = int(oldfile['/.config'].attrs.get('general.dmftsteps'))
+            if '/finish' in oldfile:
+                iteration = str('%03i'%maxiter)
+            else:
+                for i in range(maxiter,0,-1):
+                    print '/dmft-%3i'%i
+                    if i==1:
+                        raise RuntimeError('Found no valid dmft iteration to copy. Aborting...')
+                    elif '/dmft-%03i'%i in oldfile:
+                        iteration = str('%03i'%(i-1))
+                        print 'Last dmft iteration in file: ', i 
+                        print 'Copying dmft iteration: ', i-1
+                        break
+                    else:
+                        pass
+            for key in oldfile.keys():
+                if 'dmft' in key and key!=('dmft-'+iteration):
+                    pass
+                else:
+                    try:
+                        oldfile[key].copy(source=oldfile[key], dest=newfile)
+                    except:
+                        newfile.close()
+                        os.remove(destfile)
+                        raise RuntimeError('Could not copy group or dataset: '+str(key))
+                    
+            for atr in oldfile.attrs.keys():
+                newfile.attrs.create(atr,oldfile.attrs.get(atr))
+                                              
