@@ -22,6 +22,8 @@ limits = args.iters
 
 if sourcefile == destfile:
     raise RuntimeError('Source and destination equal. Please specify another destination.')
+elif os.path.exists(destfile):
+    raise RuntimeError('Destination file already exists. Please specify different destination file!')
 if limits[1]<limits[0]:
     raise RuntimeError('Upper limit has to be large than lower limit!')
 elif limits[0]<0 or limits[1]<0:
