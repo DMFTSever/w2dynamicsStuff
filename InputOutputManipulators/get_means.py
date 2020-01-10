@@ -27,51 +27,54 @@ if limits[1]<limits[0]:
 elif limits[0]<0 or limits[1]<0:
     raise RuntimeError('Limits have to be positive numbers!')
 
-with hdf5.File(sourcefile,'r') as oldfile:
-    with hdf5.File(destfile,'w') as newfile:
+try:
+    with hdf5.File(sourcefile,'r') as oldfile:
+        with hdf5.File(destfile,'w') as newfile:
+            
+            maxiter = int(oldfile['/.config'].attrs.get('general.dmftsteps'))
+            if limits[1]>maxiter:
+                raise RuntimeError(('Upper limit higher then highest iteration in sourcefile. Specify '
+                                    'an upper limit that is lower than the highest iteration in the '
+                                    'sourcefiel'))
+            for i in range(limits[0],limits[1]+1):
+                if '/dmft-{:03d}'.format(i) in oldfile:
+                    pass
+                else:
+                    raise RuntimeError(('Did not find iteration {} in source file. Specify valid '
+                                        'boundaries!').format(i))
+            nineq = 0
+            for key in oldfile['/dmft-001/'].keys():
+                if key.split('-')[0] == 'ineq':
+                    nineq += 1
+
+            for atr in oldfile.attrs.keys():
+                newfile.attrs.create(atr,oldfile.attrs.get(atr))
         
-        maxiter = int(oldfile['/.config'].attrs.get('general.dmftsteps'))
-        if limits[1]>maxiter:
-            raise RuntimeError(('Upper limit higher then highest iteration in sourcefile. Specify '
-                                'an upper limit that is lower than the highest iteration in the '
-                                'sourcefiel'))
-        for i in range(limits[0],limits[1]+1):
-            if '/dmft-{:03d}'.format(i) in oldfile:
-                pass
-            else:
-                raise RuntimeError(('Did not find iteration {} in source file. Specify valid '
-                                    'boundaries!').format(i))
-        nineq = 0
-        for key in oldfile['/dmft-001/'].keys():
-            if key.split('-')[0] == 'ineq':
-                nineq += 1
+            #we also take the start in finish group from the oldfile so hgrep accepts it as input
+            for key in oldfile.keys():
+                if 'dmft' in key: #or 'finish' in key or 'start' in key:
+                    pass
+                else:
+                    try:
+                        oldfile[key].copy(source=oldfile[key], dest=newfile)
+                    except:
+                        raise RuntimeError('Could not copy group or dataset: '+str(key))
 
-        for atr in oldfile.attrs.keys():
-            newfile.attrs.create(atr,oldfile.attrs.get(atr))
+            newfile['/.config'].attrs['z.mean.sourcefile'] = sourcefile
+            newfile['/.config'].attrs['z.mean.iterations'] = '{}-{}'.format(limits[0],limits[1])
+
+            newfile.create_group('/dmft-001')
+            for atom in range(1,nineq+1):
+                newfile.create_group('/dmft-001/ineq-{:03d}'.format(atom))
+                for quantity in ['giw-full', 'siw-full', 'gtau-full', 'g0iw-full', 'fiw-full', 'ftau-full']:
+                    newfile.create_group('/dmft-001/ineq-{:03d}/{}'.format(atom, quantity))
+                    obj = np.array([oldfile['/dmft-{:03d}/ineq-{:03d}/'.format(i,atom)+quantity+'/value'][:] for i in range(limits[0],limits[1]+1)])
+                    mean = np.mean(obj, axis=0)
+                    err = np.std(obj, axis=0)
+                    newfile.create_dataset('/dmft-001/ineq-{:03d}/{}/value'.format(atom, quantity), data=mean)
+                    newfile.create_dataset('/dmft-001/ineq-{:03d}/{}/error'.format(atom, quantity), data=err)
+except:
+    os.remove(destfile)
+    raise
     
-        #we also take the start in finish group from the oldfile so hgrep accepts it as input
-        for key in oldfile.keys():
-            if 'dmft' in key: #or 'finish' in key or 'start' in key:
-                pass
-            else:
-                try:
-                    oldfile[key].copy(source=oldfile[key], dest=newfile)
-                except:
-                    newfile.close()
-                    os.remove(destfile)
-                    raise RuntimeError('Could not copy group or dataset: '+str(key))
-
-        newfile['/.config'].attrs['z.mean.sourcefile'] = sourcefile
-        newfile['/.config'].attrs['z.mean.iterations'] = '{}-{}'.format(limits[0],limits[1])
-
-        newfile.create_group('/dmft-001')
-        for atom in range(1,nineq+1):
-            newfile.create_group('/dmft-001/ineq-{:03d}'.format(atom))
-            for quantity in ['giw-full', 'siw-full', 'gtau-full', 'g0iw-full', 'fiw-full', 'ftau-full']:
-                newfile.create_group('/dmft-001/ineq-{:03d}/{}'.format(atom, quantity))
-                obj = np.array([oldfile['/dmft-{:03d}/ineq-{:03d}/'.format(i,atom)+quantity+'/value'][:] for i in range(limits[0],limits[1]+1)])
-                mean = np.mean(obj, axis=0)
-                err = np.std(obj, axis=0)
-                newfile.create_dataset('/dmft-001/ineq-{:03d}/{}/value'.format(atom, quantity), data=mean)
-                newfile.create_dataset('/dmft-001/ineq-{:03d}/{}/error'.format(atom, quantity), data=err)
 
