@@ -8,7 +8,7 @@ import numpy as np
 import sys
 import argparse
 ### here we need to add the path to the personal myfunc directory (location of some read functions)
-sys.path.insert(0,sys.argv[0].replace('/InputOutputManipulators/get_mean_kanamori_parameters_from_Uijkl.py','/General'))
+sys.path.insert(0,sys.argv[0].replace('/InputOutputManipulators/get_mean_kanamori_parameters_from_U_ijkl.py','/General'))
 ### in order to import the functions available in input.py and interatction.py and readwrite and custom errors
 import readwrite as rw
 import custom_errors as err
