@@ -32,7 +32,7 @@ postfix = args.postfix
 
 ### load hamiltonian
 print("Loading hamiltonian on hk and kpoints on kpoints.")
-hkfile = file(filename)
+hkfile = filename
 hk, kpoints = rw.read_hk_wannier(filename, spin=spin)
 
 print("hk.shape", hk.shape)

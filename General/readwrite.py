@@ -54,7 +54,7 @@ def read_hk_wannier(filename,spin=False):
 			for k in range(0,nd):
 				hk[i,j,k] = complex(float(splitline[2*k]),float(splitline[2*k+1]))
 	if spin:
-		hk = hk.reshape(nk, 2, nd/2, 2, nd/2)
+		hk = hk.reshape(nk, 2, int(nd/2), 2, int(nd/2))
 		hk = hk.transpose(0,2,1,4,3)
 	else:
 		hk = hk.reshape(nk, 1, nd, 1, nd)
