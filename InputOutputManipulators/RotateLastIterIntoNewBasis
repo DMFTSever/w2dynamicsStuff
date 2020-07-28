@@ -1,0 +1,125 @@
+#!/usr/bin/env python
+
+from __future__ import print_function, division, absolute_import
+import numpy as np
+import h5py
+import argparse
+import os
+
+parser = argparse.ArgumentParser(description='This script copies all input and the last iteration \
+                                              from the source file into the destination file. If the \
+                                              source file does not contain the finish group then the \
+                                              second to last written iteration will be copied. \
+                                              Additionally it rotates the quantities siw, giw \
+                                              , gtau, ftau into a new basis.')
+parser.add_argument('source', help='This is the source file. It will not be changed.')
+parser.add_argument('dest', help='This is the destination file which will be generated and contain \
+                                  everthing from the source file except all but the last iteration.')
+parser.add_argument('rotMatrix', help='This is the rotation matrix (U) for the full problem. \
+                                       It will be applied in the following way: U^\dagger*O*U\
+                                       , where O is an object from siw, giw, gtau, ftau.\
+                                       If the full problem consists of only one atom this\
+                                       is equivalent to rotMatrixAt. Nevertheless, both\
+                                       need to be specified')
+parser.add_argument('rotMatrixAt', help='This is the rotation matrix (U) for atom 1...n.', nargs='*') 
+args = parser.parse_args()
+sourcefile = args.source
+destfile = args.dest
+rotMatrix = args.rotMatrix
+rotMatrixAt = args.rotMatrixAt
+if sourcefile == destfile:
+    raise RuntimeError('Source and destination equal. Please specify another destination.')
+
+quant_list = ["siw-full", "giw-full", "gtau-full", "ftau-full", "smom-full", "dc-latt"]
+
+with h5py.File(sourcefile,'r') as oldfile:
+        with h5py.File(destfile,'w') as newfile:
+            maxiter = int(oldfile['/.config'].attrs.get('general.dmftsteps'))
+            if '/finish' in oldfile:
+                iteration = str('%03i'%maxiter)
+            else:
+                for i in range(maxiter,0,-1):
+                    print('/dmft-%3i'%i)
+                    if i==1:
+                        raise RuntimeError('Found no valid dmft iteration to copy. Aborting...')
+                    elif '/dmft-%03i'%i in oldfile:
+                        iteration = str('%03i'%(i-1))
+                        print('Last dmft iteration in file: ', i )
+                        print('Copying dmft iteration: ', i-1)
+                        break
+                    else:
+                        pass
+            for key_level1 in oldfile.keys():
+                if 'dmft' in key_level1 and key_level1 != ('dmft-'+iteration):
+                    pass
+                else:
+                    try:
+                        oldfile[key_level1].copy(source=oldfile[key_level1], dest=newfile)
+                    except:
+                        newfile.close()
+                        os.remove(destfile)
+                        raise RuntimeError('Could not copy group or dataset: '+str(key_level1))
+                    
+                    ########## rotating everthing #############
+                    rot_matrix = np.loadtxt(rotMatrix, dtype=complex)
+                    inv_rot_matrix = rot_matrix.transpose().conjugate()
+                    rot_matrix_per_at = []
+                    inv_rot_matrix_per_at = []
+                    if len(rotMatrixAt)==0:
+                        rot_matrix_per_at.append(rot_matrix)
+                        inv_rot_matrix_per_at.append(inv_rot_matrix)
+                    else:
+                        for element in rotMatrixAt:
+                            rot_matrix_per_at.append(np.loadtxt(element, dtype=complex))
+                            inv_rot_matrix_per_at.append(rot_matrix_per_at[-1].transpose().conjugate())
+                        
+                    try:
+                        print(key_level1)
+                        for key_level2 in newfile[key_level1].keys():
+                            if "ineq" in key_level2:
+                                atom = int(key_level2.split('-')[1].strip("0"))-1
+                                if len(rot_matrix_per_at) < atom+1:
+                                    raise RuntimeError("Please specify rotation Matrix for all atoms in the hdf5 file!")
+                                print("  "+key_level2, atom)
+                                for key_level3 in newfile[key_level1][key_level2]:
+                                    if key_level3 in quant_list:
+                                        print("    "+key_level3, newfile[key_level1][key_level2][key_level3]["value"].shape)
+                                        quant = newfile[key_level1][key_level2][key_level3]["value"][:]
+                                        shape = quant.shape
+                                        if key_level3 != 'smom-full':
+                                            newquant = np.einsum('ab,bck,cd -> adk', inv_rot_matrix_per_at[atom], \
+                                                                 quant.reshape((shape[0]*shape[1],shape[2]*shape[3],shape[4]))\
+                                                                 , rot_matrix_per_at[atom]).reshape(shape)
+                                        else:
+                                            newquant = np.einsum('ab,bck,cd -> adk', inv_rot_matrix_per_at[atom].transpose(), \
+                                                                 quant.reshape((shape[0]*shape[1],shape[2]*shape[3],shape[4]))\
+                                                                 , rot_matrix_per_at[atom].transpose()).reshape(shape)
+                                        print(type(quant), type(newquant))
+                                        print(type(quant[0,0,0,0,0]), type(newquant[0,0,0,0,0]))
+                                        
+
+                                        ########### GO ON HERE: datatype of gtaunew is complex whereas old is float, needs to be changed! delete old dataset an create a new one!)
+                                        newfile[key_level1][key_level2][key_level3]["value"] = newquant[:]
+
+                            elif ("dmft" in key_level1) and (key_level2 in quant_list):
+                                print("  "+key_level2, newfile[key_level1][key_level2]["value"].shape)
+                                quant = newfile[key_level1][key_level2]["value"][:]
+                                shape = quant.shape
+                                newquant = np.einsum('ab,bc,cd -> ad', inv_rot_matrix, \
+                                                     quant.reshape((shape[0]*shape[1],shape[2]*shape[3]))\
+                                                     , rot_matrix).reshape(shape)
+                                print(shape,newquant.shape)
+                            else:
+                                print("  "+key_level2)
+                        print("")
+                            
+                    except:
+                        newfile.close()
+                        os.remove(destfile)
+                        raise RuntimeError("Rotation process went wrong.")
+                    
+            for atr in oldfile.attrs.keys():
+                newfile.attrs.create(atr,oldfile.attrs.get(atr))
+                                              
+            
+os.remove(destfile)
