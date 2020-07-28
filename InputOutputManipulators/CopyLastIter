@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function, division, absolute_import
 import numpy as np
 import h5py
 import argparse
@@ -24,13 +25,13 @@ with h5py.File(sourcefile,'r') as oldfile:
                 iteration = str('%03i'%maxiter)
             else:
                 for i in range(maxiter,0,-1):
-                    print '/dmft-%3i'%i
+                    print('/dmft-%3i'%i)
                     if i==1:
                         raise RuntimeError('Found no valid dmft iteration to copy. Aborting...')
                     elif '/dmft-%03i'%i in oldfile:
                         iteration = str('%03i'%(i-1))
-                        print 'Last dmft iteration in file: ', i 
-                        print 'Copying dmft iteration: ', i-1
+                        print('Last dmft iteration in file: ', i )
+                        print('Copying dmft iteration: ', i-1)
                         break
                     else:
                         pass

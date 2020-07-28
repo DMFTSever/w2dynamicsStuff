@@ -5,6 +5,7 @@
 ##########################################################################################
 #usage: python giw_trace.py <hdf5 file to use> <number of atom for which the trace should be calculated> <iteration for which to perform trace, default: last>
 ##########################################################################################
+from __future__ import print_function, division, absolute_import
 import numpy as np
 import h5py
 import sys 
@@ -21,35 +22,35 @@ try:
     at = "%03i"%at
     if filename[-5:] != ".hdf5": raise err.InputError("Error reading input.", "No hdf5 file found as second argument")
 except err.InputError as error:
-    print error.expression
-    print error.message
-    print "usage: python giw_trace.py <hdf5 file to use> <number of atom for which the trace should be calculated> <iteration for which to perform trace, default: last>"
+    print(error.expression)
+    print(error.message)
+    print("usage: python giw_trace.py <hdf5 file to use> <number of atom for which the trace should be calculated> <iteration for which to perform trace, default: last>")
     sys.exit()
 except ValueError:
-    print "Error assigning atom number to " + sys.argv[2]
-    print "Must be integer smaller 999"
+    print("Error assigning atom number to " + sys.argv[2])
+    print("Must be integer smaller 999")
 except:
-    print "Some unkown error occourd during opening input file"
+    print("Some unkown error occourd during opening input file")
     sys.exit()
 
 try:
     f = h5py.File(filename, 'r')
 except:
-    print "file " + filename + "  cannot be opened."
+    print("file " + filename + "  cannot be opened.")
     sys.exit()
 
-print "Extracing some config parameters"
+print("Extracing some config parameters")
 Nat = f["/.config"].attrs.get('general.nat')
 
 try: 
     if int(at) > Nat: raise err.InputError("Error getting number of d bands", "Atom to use not in hdf5 file")
     Ndbands =f["/.config"].attrs.get(("atoms."+ str(int(at)) +".nd"))
 except err.InputError as error:
-    print error.expression
-    print error.message
+    print(error.expression)
+    print(error.message)
     sys.exit()
 except:
-    print "Unkown error while extraction number of d bands."
+    print("Unkown error while extraction number of d bands.")
     sys.exit()
 
 try:
@@ -67,37 +68,37 @@ try:
     else: 
         raise err.InputError("Error extracting giw of iteration" + sys.argv[3], "Not a valid iteration number")
 except err.InputError as error:
-    print error.expression
-    print error.message
+    print(error.expression)
+    print(error.message)
     sys.exit()
 except ValueError:
-    print "Error extractin giw of iteration" + iteration
-    print "Not a valid iteration number. Needs to be integer."
+    print("Error extractin giw of iteration" + iteration)
+    print("Not a valid iteration number. Needs to be integer.")
     sys.exit()
 except:
-    print "No iteration given. Defaulting to last"
+    print("No iteration given. Defaulting to last")
     iteration = "last"
 
-print "Extracting giw-full of atom " + at + " of " + iteration + "iteration from " + filename
+print("Extracting giw-full of atom " + at + " of " + iteration + "iteration from " + filename)
 try:
     giw = f["/dmft-" + iteration + "/ineq-" + at + "/giw-full/value"][:,:,:,:,:]
 except:
-    print "Cannot extract giw-full of atom " + at + " of iteration " + iteration + " from " + filename
+    print("Cannot extract giw-full of atom " + at + " of iteration " + iteration + " from " + filename)
     sys.exit()
-print "giw.shape ", giw.shape
+print("giw.shape ", giw.shape)
 
-print "Extracting iw axis from " + filename
+print("Extracting iw axis from " + filename)
 iw = np.array(f["/.axes/iw"])
-print "iw.shape", iw.shape
+print("iw.shape", iw.shape)
 iwpoints = iw.shape[0]
 
-print "Calculating Trace"
+print("Calculating Trace")
 giw = giw.reshape(2*Ndbands,2*Ndbands,iwpoints)
-print "giw.shape ", giw.shape
+print("giw.shape ", giw.shape)
 giw_trace = giw.trace()
-print "giw_trace.shape ", giw_trace.shape
+print("giw_trace.shape ", giw_trace.shape)
 
-print "Writting giw_trace to file: " + "giw_atom_"+at+"_iteration_"+iteration+"_trace.dat"
+print("Writting giw_trace to file: " + "giw_atom_"+at+"_iteration_"+iteration+"_trace.dat")
 rw.write_function("giw_atom_"+at+"_iteration_"+iteration+"_trace.dat", iw, "iw", giw_trace, "Tr(Giw)", "This file contains the trace of giw-full of "+filename)
 
 f.close()

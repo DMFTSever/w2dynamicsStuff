@@ -1,3 +1,4 @@
+from __future__ import print_function, division, absolute_import
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -184,7 +185,7 @@ usepaths = tempusepaths
 if plotbool == False: raise RuntimeError("No Maxent directory found")
 	
 for pair in usepaths:
-	print pair
+	print(pair)
 
 #PLOTTING
 plt.rcParams["text.usetex"] = True
@@ -208,8 +209,8 @@ hamiltoniandict = {'Density':'Density', 'Kanamori':'Kanamori', 'ReadUmatrix':'fu
 if hamiltonians == None: hamiltonians = ["Density", "Kanamori", "ReadUmatrix", "ReadNormalUmatrix"]
 for hamiltonian in hamiltonians:
 	
-	print ""
-	print "Plotting for Hamiltonian: ", hamiltonian
+	print("")
+	print("Plotting for Hamiltonian: ", hamiltonian)
 	#Generating figures
 
 	if spin == 2 and ('12' in os.listdir(usepaths[0][1] + "/atom1/")) :
@@ -220,7 +221,7 @@ for hamiltonian in hamiltonians:
                 box.x0 = box.x0 + 0.21
                 box.x1 = box.x1 + 0.21
                 mainaw[Nbands,0].set_position(box)
-		print type(mainaw)
+		print(type(mainaw))
 		figaw.suptitle(r"Diagonal entries of $A(\omega)$" +'\nfor ' + hamiltoniandict[hamiltonian] + ' Hamiltonian', fontsize=20)
 		for i in range(0,Nbands+1):
 			if xranges[1] != -1:
@@ -262,7 +263,7 @@ for hamiltonian in hamiltonians:
 		mainaw[Nbands].set_title(r"Average $A(\omega)$ of all orbitals spin up")
 		mainaw[Nbands].set_xlabel(r"$\omega$")
 
-	print "Entering for loop to extraxt and plot data"
+	print("Entering for loop to extraxt and plot data")
 	foundfile = False
 	for filepath, dirpath in usepaths:
 		lambdaa = 0
@@ -270,11 +271,11 @@ for hamiltonian in hamiltonians:
 		for element in parts:
 			if 'lambda' in element:
 				lambdaa = float(element[6:])
-		print ''
-		print dirpath
+		print('')
+		print(dirpath)
 
 		#extracting A(omega) of atoms to plot
-		print "Extracting metadata of directory ", dirpath
+		print("Extracting metadata of directory ", dirpath)
 		f = h5py.File(filepath)
 		hamilton = str(f["/.config"].attrs.get("atoms.1.hamiltonian")).capitalize()
 		if hamilton.lower() == hamiltonian.lower():
@@ -348,7 +349,7 @@ for hamiltonian in hamiltonians:
 					f.close()
 		
 			#add to plots of figures
-			print "Adding data to plots"
+			print("Adding data to plots")
 			if plotbetas== True:
 				label= r"$\beta$ " + str(beta)
 				normval = 1./beta
@@ -372,7 +373,7 @@ for hamiltonian in hamiltonians:
 						mainaw[j].plot(waxis[:], np.real(aw[i,j,spin,:]), label=label + " atom " + str(plotatoms[i]), lw=lw, c=cm(norm(normval)))
 					mainaw[Nbands].plot(waxis[:], np.real(aw[i,Nbands,spin,:])/Nbands, label=label + " atom " + str(plotatoms[i]), lw=lw, c=cm(norm(normval)))
 	if foundfile:
-		print "Found at least one file for this Hamiltonian. Generating output files"
+		print("Found at least one file for this Hamiltonian. Generating output files")
 
 		if spin==2:
 			for i in range(0,Nbands):
@@ -389,5 +390,5 @@ for hamiltonian in hamiltonians:
 			filenameaw = basetitle + "_" + hamiltonian + "_spec.pdf"
 		figaw.savefig(filenameaw)
 	else:
-		print "Found no file for this Hamiltonian. No output generated."
+		print("Found no file for this Hamiltonian. No output generated.")
 				

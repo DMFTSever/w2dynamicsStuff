@@ -3,6 +3,7 @@
 ###################################################################################################
 
 # imports
+from __future__ import print_function, division, absolute_import
 import h5py as hdf5
 import numpy as np
 import sys
@@ -24,20 +25,20 @@ filename = args.ufile
 spin = args.spin
 
 #load umatrix
-print "Loading Umatrix"
+print("Loading Umatrix")
 umatrix = rw.read_umatrix(filename,spin=spin)
 umatrix = np.real(umatrix)
-print "umatrix.shape", umatrix.shape
+print("umatrix.shape", umatrix.shape)
 
 if (not spin):
-	print "Temporary blowing up U matrix"
+	print("Temporary blowing up U matrix")
 	newumatrix = np.zeros((umatrix.shape[0],) + (2,) + (umatrix.shape[1],) + (2,) + (umatrix.shape[2],) + (2,) + (umatrix.shape[3],) + (2,))
 	newumatrix[:,0,:,0,:,0,:,0] = umatrix[:,:,:,:]
 	newumatrix[:,1,:,0,:,1,:,0] = umatrix[:,:,:,:]
 	newumatrix[:,0,:,1,:,0,:,1] = umatrix[:,:,:,:]
 	newumatrix[:,1,:,1,:,1,:,1] = umatrix[:,:,:,:]
 	umatrix = newumatrix
-	print "umatrix.shape", umatrix.shape
+	print("umatrix.shape", umatrix.shape)
 
 bands = umatrix.shape[0]
 spins = umatrix.shape[1] 
@@ -77,40 +78,40 @@ for spin1 in range(0,spins):
 										J[band1,spin1,band2,spin2,band3,spin3,band4,spin4] = Jdd[-1]
 									
 										
-print ""
-print "Nonzero U entries:"
+print("")
+print("Nonzero U entries:")
 for index, value in np.ndenumerate(U):
 	if value != 0:
-		print str(index[0]+1)+spindict[index[1]], str(index[2]+1)+spindict[index[3]], str(index[4]+1)+spindict[index[5]], str(index[6]+1)+spindict[index[7]], value
-print ""
-print "Nonzero V entries:"
+		print(str(index[0]+1)+spindict[index[1]], str(index[2]+1)+spindict[index[3]], str(index[4]+1)+spindict[index[5]], str(index[6]+1)+spindict[index[7]], value)
+print("")
+print("Nonzero V entries:")
 for index , value in np.ndenumerate(V):
 	if value != 0:
-		print str(index[0]+1)+spindict[index[1]], str(index[2]+1)+spindict[index[3]], str(index[4]+1)+spindict[index[5]], str(index[6]+1)+spindict[index[7]], value
-print ""
-print "Nonzero J entries:"
+		print(str(index[0]+1)+spindict[index[1]], str(index[2]+1)+spindict[index[3]], str(index[4]+1)+spindict[index[5]], str(index[6]+1)+spindict[index[7]], value)
+print("")
+print("Nonzero J entries:")
 for index, value in np.ndenumerate(J):
 	if value != 0:
-		print str(index[0]+1)+spindict[index[1]], str(index[2]+1)+spindict[index[3]], str(index[4]+1)+spindict[index[5]], str(index[6]+1)+spindict[index[7]], value
-print ""
-print "-----RESULTS-----"
-print ""
-#print "Udd: ", Udd                                        
-print "mean(Udd) = ", np.mean(Udd)
-print "std(Udd) = ", np.std(Udd)
+		print(str(index[0]+1)+spindict[index[1]], str(index[2]+1)+spindict[index[3]], str(index[4]+1)+spindict[index[5]], str(index[6]+1)+spindict[index[7]], value)
+print("")
+print("-----RESULTS-----")
+print("")
+#print("Udd: ", Udd                                        )
+print("mean(Udd) = ", np.mean(Udd))
+print("std(Udd) = ", np.std(Udd))
 NUdd = len(np.nonzero(Udd)[0])
-print "Number of entries contributing: " + str(NUdd)
-print ""
-#print "Vdd: ", Vdd
-print "mean(Vdd) = ", np.mean(Vdd)
-print "std(Vdd) = ", np.std(Vdd)
+print("Number of entries contributing: " + str(NUdd))
+print("")
+#print("Vdd: ", Vdd)
+print("mean(Vdd) = ", np.mean(Vdd))
+print("std(Vdd) = ", np.std(Vdd))
 NVdd =  len(np.nonzero(Vdd)[0])
-print "Number of entries contributing: " + str(NVdd)
-print ""
-#print "Jdd: ", Jdd
-print "mean(Jdd) = ", np.mean(Jdd)
-print "std(Jdd) = ", np.std(Jdd)
+print("Number of entries contributing: " + str(NVdd))
+print("")
+#print("Jdd: ", Jdd)
+print("mean(Jdd) = ", np.mean(Jdd))
+print("std(Jdd) = ", np.std(Jdd))
 NJdd = len(np.nonzero(Jdd)[0])
-print "Number of entries contributing: " + str(NJdd)
-print ""
-print "Total number of entries contributing: " + str(NUdd + NVdd + NJdd)
+print("Number of entries contributing: " + str(NJdd))
+print("")
+print("Total number of entries contributing: " + str(NUdd + NVdd + NJdd))

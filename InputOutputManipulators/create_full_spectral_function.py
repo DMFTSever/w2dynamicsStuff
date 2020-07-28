@@ -1,3 +1,4 @@
+from __future__ import print_function, division, absolute_import
 import numpy as np
 from numpy.linalg import inv
 import scipy.optimize as opt
@@ -267,7 +268,7 @@ k = 0
 Ak = np.zeros((iwn.shape[0],Hk.shape[1],Hk.shape[2]),dtype=complex)
 for Hk_idx in Hk:
   if np.mod(k,100)==0:
-    print k
+    print(k)
   Ziw = (iwn[:,None,None] + mu)*eye - Siw - Hk_idx
   Ak[:,:,:] = Ak[:,:,:] + inv(Ziw)
   k+=1
@@ -287,7 +288,7 @@ for i1 in range(0,Hk.shape[1]):
     fname += str(i1)
     fname += "_"
     fname += str(i2)
-    print 'Writing:',fname
+    print('Writing:',fname)
     fname += ".dat"
 
     if i1==i2:
@@ -306,4 +307,4 @@ for j in range(0,iwn.shape[0]):
   f.write( str(iwn[j]) + ' ' + str(-np.imag(A_verage[j]))  + ' ' + str(np.real(A_verage[j])) + '\n')  
 f.close
 
-print 'Success'
+print('Success')

@@ -1,3 +1,4 @@
+from __future__ import print_function, division, absolute_import
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -210,8 +211,8 @@ hamiltoniandict = {'Density':'Density', 'Kanamori':'Kanamori', 'ReadUmatrix':'fu
 if hamiltonians == None: hamiltonians = ["Density", "Kanamori", "ReadUmatrix", "ReadNormalUmatrix"]
 for hamiltonian in hamiltonians:
 	
-	print ""
-	print "Plotting for Hamiltonian: ", hamiltonian
+	print("")
+	print("Plotting for Hamiltonian: ", hamiltonian)
 	#Generating figures
 	figsign, mainsign = plt.subplots(1,1,figsize=(6.5,5))
 	figsign.suptitle("Average sign of " + hamiltoniandict[hamiltonian] + " Hamiltonian", fontsize=15)
@@ -345,12 +346,12 @@ for hamiltonian in hamiltonians:
 		mainocc[2].set_xlabel(occlabel)
 		mainocc[3].set_xlabel(occlabel)
 
-	print "Entering for loop to extraxt and plot data"
+	print("Entering for loop to extraxt and plot data")
 	foundfile = False
 	for filepath in usepaths:
 
 		#extracting siw, giw, occ of atoms to plot
-		print "Extracting metadata of file ", filepath
+		print("Extracting metadata of file ", filepath)
 		lambdaa = 0
 		parts=filepath.split('/')[-1].split('_')
 		for element in parts:
@@ -367,14 +368,14 @@ for hamiltonian in hamiltonians:
 			plotatoms = [x for x in atoms if x in ineqatoms]	
 			for i in range(0,100):
 				iteration = "%03i" %(intiteration-i)
-				print "Trying to plot iteration Nr. %s" %iteration
+				print("Trying to plot iteration Nr. %s" %iteration)
 				try:
 					giwshape = f["/dmft-" + iteration + "/ineq-001/giw-full/value"][:].shape
 					siwshape = f["/dmft-" + iteration + "/ineq-001/siw-full/value"][:].shape
 					occshape = f["/dmft-" + iteration + "/ineq-001/occ/value"][:].shape
 				except:
 					if useiter != 0:
-						print "Did not find iteration Nr. %s. Using iteration Nr. "%iteration + str(useiter)
+						print("Did not find iteration Nr. %s. Using iteration Nr. "%iteration + str(useiter))
 						iteration = "%03i" %useiter
 						giwshape = f["/dmft-" + iteration + "/ineq-001/giw-full/value"][:].shape
 						siwshape = f["/dmft-" + iteration + "/ineq-001/siw-full/value"][:].shape
@@ -416,7 +417,7 @@ for hamiltonian in hamiltonians:
 				lambdalist.append(lambdaa)
 
 			#add to plots of figures
-			print "Adding data to plots"
+			print("Adding data to plots")
 
 			if plotbetas== True:
 				label= r"$\beta$ " + str(beta)
@@ -464,7 +465,7 @@ for hamiltonian in hamiltonians:
 				lw = 3 - i*0.5
 				maintrgiw.plot(iwaxis[lb:], np.imag(trgiw[i,lb:]), label=label  + " atom " + str(plotatoms[i]), lw=lw, marker='o', c=cm(norm(normval)))
 	if foundfile:
-		print "Found at least one file for this Hamiltonian. Generating output files"
+		print("Found at least one file for this Hamiltonian. Generating output files")
 
 		norm2 = mcolors.Normalize(0,Nbands)
 		if plotbetas == True:
@@ -580,7 +581,7 @@ for hamiltonian in hamiltonians:
 		figoccn.savefig(filenameocc)
 		figsign.savefig(filenamesign)
 	else:
-		print "Found no file for this Hamiltonian. No output generated."
+		print("Found no file for this Hamiltonian. No output generated.")
 				
 #add argparse to give startpath, optionals to specify beta and hamiltonians and one string to append to the title, specify xrange
 #plot specific components of (siw, giw), with options to plot all,  Tr(giw), plot occ

@@ -1,4 +1,5 @@
 # imports
+from __future__ import print_function, division, absolute_import
 import h5py as hdf5
 import numpy as np
 import sys
@@ -21,39 +22,39 @@ epsilon = args.epsilon
 Na = args.Natoms
 
 #setting the epsilon parameter for the SOC
-print "epsilonSOC = ", epsilon
+print("epsilonSOC = ", epsilon)
 
 ### load hamiltonian
-print "Loading hamiltonian from file: ", hkfile
+print("Loading hamiltonian from file: ", hkfile)
 hk, kpoints = rw.read_hk_wannier(hkfile,spin=False)
 
-print "hk.shape", hk.shape
-print "kpoints.shape", kpoints.shape
+print("hk.shape", hk.shape)
+print("kpoints.shape", kpoints.shape)
 
 ### get number of k-points
 Nk=kpoints.shape[0]
-print "Nk", Nk
+print("Nk", Nk)
 
 ### number of d-orbitals
 Nd=hk.shape[1]
-print "Nd", Nd
+print("Nd", Nd)
 
 #Setting atoms and orbitals per atom
 Ndpa = Nd/Na       #Number of d-orbitals per atom
 Ns = 2             #Number of spins
-print "Na", Na 
-print "Ndpa", Ndpa 
-print "Ns", Ns
+print("Na", Na )
+print("Ndpa", Ndpa )
+print("Ns", Ns)
 
 #Blowing the Hamiltonian to up for spin inclusion
 hk = hk.transpose(0,1,3,2,4)
-print "hk.shape", hk.shape
-print "Blowing up Hamiltonian"
+print("hk.shape", hk.shape)
+print("Blowing up Hamiltonian")
 hk = np.append(np.append(hk,np.zeros_like(hk),axis=4),np.append(hk,np.zeros_like(hk),axis=4)[:,:,:,:,::-1],axis=3)
-print "hk.shape", hk.shape
+print("hk.shape", hk.shape)
 
 #build hSOC from pauli matricies
-print "Building hSOC"
+print("Building hSOC")
 hSOC = np.zeros_like(hk[1])
 sigma1 = np.array([[0,1],[1,0]])
 sigma2 = np.array([[0,-1j],[1j,0]])
@@ -67,17 +68,17 @@ for i in range(0,Na):
 		hSOC[2+3*i,0+3*i] = -1j*sigma1
 		hSOC[2+3*i,1+3*i] = 1j*sigma2
 hSOC = epsilon * hSOC
-print "hSOC.shape", hSOC.shape
+print("hSOC.shape", hSOC.shape)
 
 #build hkSOC
-print "Building hkSOC"
+print("Building hkSOC")
 hkSOC = np.zeros_like(hk)
 for i in range(0,hkSOC.shape[0]):
 	hkSOC[i] = hSOC
-print "hkSOC.shape", hkSOC.shape
+print("hkSOC.shape", hkSOC.shape)
 
 #Adding together hk and hkSOC
-print "Adding hkSOC to hk"
+print("Adding hkSOC to hk")
 hk += hkSOC
 
 #Building hkmean as check
@@ -86,18 +87,18 @@ hkmean = hkmean.transpose(0,2,1,3)
 hkmean = hkmean.reshape(Ns*Nd,Ns*Nd)
 
 #writting hkmean of the first atom
-print "hkmean including SOC for the first atom" 
+print("hkmean including SOC for the first atom" )
 for i in range(0,6):
-	print '%+3.3f%+3.3fi' % (np.real(hkmean[i,0]), np.imag(hkmean[i,0])), '%+3.3f%+3.3fi' % (np.real(hkmean[i,1]), np.imag(hkmean[i,1])), '%+3.3f%+3.3fi' % (np.real(hkmean[i,2]), np.imag(hkmean[i,2])), '%+3.3f%+3.3fi' % (np.real(hkmean[i,3]), np.imag(hkmean[i,3])), '%+3.3f%+3.3fi' % (np.real(hkmean[i,4]), np.imag(hkmean[i,4])), '%+3.3f%+3.3fi' % (np.real(hkmean[i,5]), np.imag(hkmean[i,5]))
+	print('%+3.3f%+3.3fi' % (np.real(hkmean[i,0]), np.imag(hkmean[i,0])), '%+3.3f%+3.3fi' % (np.real(hkmean[i,1]), np.imag(hkmean[i,1])), '%+3.3f%+3.3fi' % (np.real(hkmean[i,2]), np.imag(hkmean[i,2])), '%+3.3f%+3.3fi' % (np.real(hkmean[i,3]), np.imag(hkmean[i,3])), '%+3.3f%+3.3fi' % (np.real(hkmean[i,4]), np.imag(hkmean[i,4])), '%+3.3f%+3.3fi' % (np.real(hkmean[i,5]), np.imag(hkmean[i,5])))
 
 #Shaping it such that it can be written in wanner90 format
-print "Shaping Hamiltonian for passing to write function"
-print "hk.shape", hk.shape
+print("Shaping Hamiltonian for passing to write function")
+print("hk.shape", hk.shape)
 hk = hk.transpose(0,1,3,2,4)
-print "hk.shape", hk.shape
+print("hk.shape", hk.shape)
 
 #Writting output
 hkfilenew = hkfile[:-4] + "_SOC" + str(epsilon) + ".dat"
-print "Writting Hamiltonian to file: " + hkfilenew
+print("Writting Hamiltonian to file: " + hkfilenew)
 rw.write_hk_wannier(hkfilenew,hk,kpoints)
 

@@ -2,6 +2,7 @@
 # This script rotates an object into or from the basis in which Hloc is diagonal #
 ##################################################################################
 
+from __future__ import print_function, division, absolute_import
 import numpy as np
 #import matplotlib.pyplot as plt
 import sys
@@ -70,33 +71,33 @@ if rotate_siw == True:
     rot_objs.append("siw")
 
 if Nspins == 2:
-    print "Loading spin dependent hamiltonian on hk and kpoints on kpoints."
+    print("Loading spin dependent hamiltonian on hk and kpoints on kpoints.")
     hk, kpoints = rw.read_hk_wannier(hkfile, spin=True)
 else:
-    print "Loading spin independent hamiltonian on hk and kpoints on kpoints."
+    print("Loading spin independent hamiltonian on hk and kpoints on kpoints.")
     hk, kpoints = rw.read_hk_wannier(hkfile, spin=False)
 Nk=kpoints.shape[0]
-print "hk.shape", hk.shape
-print "kpoints.shape", kpoints.shape
+print("hk.shape", hk.shape)
+print("kpoints.shape", kpoints.shape)
 
 
-print "Building hkmean i.e. averaging over all k points"
+print("Building hkmean i.e. averaging over all k points")
 hkmean = 1./Nk * np.sum(hk, axis=0)
-print "hkmean.shape", hkmean.shape
+print("hkmean.shape", hkmean.shape)
 hkmean = hkmean.reshape(Nspins*Nbands*Natoms,Nspins*Nbands*Natoms)
-print "hkmean.shape", hkmean.shape
-print "Building hkmean_pa (hkmean per atom)"
+print("hkmean.shape", hkmean.shape)
+print("Building hkmean_pa (hkmean per atom)")
 hkmean_pa = np.zeros((Natoms,Nspins*Nbands,Nspins*Nbands),dtype=complex)
 for i in range(0,Natoms):
     hkmean_pa[i] = hkmean[i*Nspins*Nbands:(i+1)*Nspins*Nbands,i*Nspins*Nbands:(i+1)*Nspins*Nbands]
 
-print "hkmean_pa.shape", hkmean_pa.shape
+print("hkmean_pa.shape", hkmean_pa.shape)
     
 if Nspins == 2:
     for atom in atoms:
-        print "hkmean_pa[" + str(atom) + "]"
+        print("hkmean_pa[" + str(atom) + "]")
         for i in range(0,Nspins*Nbands):
-            print '%+05.5f%+05.5fi' %(np.real(hkmean_pa[atom,i,0]), np.imag(hkmean_pa[atom,i,0])), \
+            print('%+05.5f%+05.5fi' %(np.real(hkmean_pa[atom,i,0]), np.imag(hkmean_pa[atom,i,0])), \)
                   '%+05.5f%+05.5fi' %(np.real(hkmean_pa[atom,i,1]), np.imag(hkmean_pa[atom,i,1])), \
                   '%+05.5f%+05.5fi' %(np.real(hkmean_pa[atom,i,2]), np.imag(hkmean_pa[atom,i,2])), \
                   '%+05.5f%+05.5fi' %(np.real(hkmean_pa[atom,i,3]), np.imag(hkmean_pa[atom,i,3])), \
@@ -104,38 +105,38 @@ if Nspins == 2:
                   '%+05.5f%+05.5fi' %(np.real(hkmean_pa[atom,i,5]), np.imag(hkmean_pa[atom,i,5])) 
 else:
     for atom in atoms:
-        print "hkmean_pa[" + str(atom) + "]"
+        print("hkmean_pa[" + str(atom) + "]")
         for i in range(0,Nspins*Nbands):
-            print '%+05.5f%+05.5fi' %(np.real(hkmean_pa[atom,i,0]), np.imag(hkmean_pa[atom,i,0])), \
+            print('%+05.5f%+05.5fi' %(np.real(hkmean_pa[atom,i,0]), np.imag(hkmean_pa[atom,i,0])), \)
                   '%+05.5f%+05.5fi' %(np.real(hkmean_pa[atom,i,1]), np.imag(hkmean_pa[atom,i,1])), \
                   '%+05.5f%+05.5fi' %(np.real(hkmean_pa[atom,i,2]), np.imag(hkmean_pa[atom,i,2])), \
 
-print "Solving the Eigenvalue problem for hkmean_pa"
+print("Solving the Eigenvalue problem for hkmean_pa")
 EigVal = np.zeros((Natoms,Nspins*Nbands),dtype=complex)
 EigVec = np.zeros_like(hkmean_pa)
 for i in range(0,Natoms):
 	EigVal[i], EigVec[i] = np.linalg.eigh(hkmean_pa[i])
-	print "Eigenvalues atom ", i+1
-	print EigVal[i]
+	print("Eigenvalues atom ", i+1)
+	print(EigVal[i])
 
 #test for non spin rotation
 if Nspins == 1:
-    print "Blowing up Transformation matrix to two spins"
+    print("Blowing up Transformation matrix to two spins")
     temp = EigVec.copy()
     EigVec = np.zeros((Natoms,Nbands,2,Nbands,2), dtype=complex)
     EigVec[:,:,0,:,0] = temp[:]
     EigVec[:,:,1,:,1] = temp[:]
-    print "EigVec.shape ", EigVec.shape
+    print("EigVec.shape ", EigVec.shape)
     EigVec = EigVec.reshape(Natoms,2*Nbands,2*Nbands)
-    print "EigVec.shape ", EigVec.shape
+    print("EigVec.shape ", EigVec.shape)
 
-print "Loading hdf5 file: " + hdf5file
+print("Loading hdf5 file: " + hdf5file)
 f=hdf5.File(hdf5file,"r")
 if iteration == None:
-    print 'Using last iteration'
+    print('Using last iteration')
     iteration = "%03i" %int(f["/.config"].attrs.get("general.dmftsteps")) #using the last Iteration
 else:
-    print 'Using %03i iteration' %iteration
+    print('Using %03i iteration' %iteration)
     iteration = "%03i" %iteration
 
 #Checking for directory to put results
@@ -150,8 +151,8 @@ if not os.path.exists(basedir):
 for obj in rot_objs:
     for atom in atoms:
         atomstr = "%03i" %(atom+1)
-        print ""
-        print "Loading object " + obj + " of atom " + atomstr
+        print("")
+        print("Loading object " + obj + " of atom " + atomstr)
         values = f["dmft-" + iteration + "/ineq-" + atomstr + "/" + obj + "-full/value"][:]
         values = np.array(values,dtype=complex)
         if obj in ['gtau']:
@@ -164,16 +165,16 @@ for obj in rot_objs:
             axis = f[".axes/iw"][:]
             ax = "iw"
         n = values.shape[-1]
-        print values.shape, n
-        print axis.shape
-        print "Building basis transformation matrices"
+        print(values.shape, n)
+        print(axis.shape)
+        print("Building basis transformation matrices")
         if toDIAG:
             Trafo = np.array(EigVec[atom])
             InvTrafo = np.conjugate(np.transpose(Trafo))
         else:
             InvTrafo = np.array(EigVec[atom])
             Trafo = np.conjugate(np.transpose(InvTrafo))
-        print "Checking if transformation is unitary."
+        print("Checking if transformation is unitary.")
         try:
             if not np.allclose(np.dot(InvTrafo,Trafo),np.eye(2*Nbands)): raise RuntimeError("Full transformation \
                is not unitary! You may try to change np.linalg.eigh to np.linalg.eig at diagonalisation procedure")
@@ -181,17 +182,17 @@ for obj in rot_objs:
             raise
             sys.exit()
         else:
-            print "Transformation all clear."
+            print("Transformation all clear.")
             
-        print "Rotating"
+        print("Rotating")
         values = values.reshape(2*Nbands,2*Nbands,n)
-        print obj + ".shape", values.shape
+        print(obj + ".shape", values.shape)
         for i in range(0,n):
             values[:,:,i] = np.dot(InvTrafo,np.dot(values[:,:,i],Trafo))
         values = values.reshape(Nbands,2,Nbands,2,n)
-        print obj + ".shape", values.shape
+        print(obj + ".shape", values.shape)
 
-        print "Saving " + obj
+        print("Saving " + obj)
         targetdir = basedir + "/atom-" + atomstr
         if not os.path.exists(targetdir):
             os.makedirs(targetdir)

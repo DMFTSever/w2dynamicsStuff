@@ -7,6 +7,7 @@
 #Severino Adler 24.09.2018                                                                                                                              #
 #########################################################################################################################################################
 
+from __future__ import print_function, division, absolute_import
 import numpy as np
 import sys
 import custom_errors as err
@@ -195,7 +196,7 @@ def write_function(filename, axis, axisname, function, functionname, header=""):
 		sys.exit()
 	except:
 		raise
-		print "Error: Cannot open file: " + str(filename)
+		print("Error: Cannot open file: " + str(filename))
 		sys.exit()
 	
 	formats = [10,10]
@@ -268,9 +269,9 @@ if __name__ == "__main__":
 	
 	hfile = file("Hk_LiOsO3_SOC.dat")
 	hk, kpoints = io.read_hamiltonian(hfile, spin_orbit=True)
-	print hk.shape
+	print(hk.shape)
 	hk1, kpoints1 = read_hk_wannier("Hk_LiOsO3_SOC.dat", spin=True)
-	print hk1.shape
-	print np.allclose(hk, hk1)
-	print np.allclose(kpoints, kpoints1)
+	print(hk1.shape)
+	print(np.allclose(hk, hk1))
+	print(np.allclose(kpoints, kpoints1))
 
