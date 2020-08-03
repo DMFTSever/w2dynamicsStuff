@@ -110,7 +110,7 @@ InvTrafo = Trafo.conj().T
 print("Writting Trafos (Q): Hdiag = Q^{-1}HQ")
 for i in range(0,Natoms):
         np.savetxt("Trafo_at"+str(i+1)+"_"+postfix+".dat",EigVec[i])
-np.savetxt("Trafo_Full.dat",Trafo)
+np.savetxt("Trafo_Full_"+postfix+".dat",Trafo)
 
 print("Checking if full transformation is unitary.")
 try:
