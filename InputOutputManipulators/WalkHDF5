@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+
+from __future__ import print_function, division, absolute_import
+import numpy as np
+import h5py
+import argparse
+import os
+
+parser = argparse.ArgumentParser(description='For walking the hdf5 scipt (only last iteration)')
+parser.add_argument('source', help='This is the source file. It will not be changed.')
+args = parser.parse_args()
+sourcefile = args.source
+
+quant_list = ["siw-full", "giw-full", "gtau-full", "ftau-full", "smom-full", "dc-latt"]
+
+with h5py.File(sourcefile,'r') as oldfile:
+        maxiter = int(oldfile['/.config'].attrs.get('general.dmftsteps'))
+        if '/finish' in oldfile:
+            iteration = str('%03i'%maxiter)
+        else:
+            for i in range(maxiter,0,-1):
+                print('/dmft-%3i'%i)
+                if i==1:
+                    raise RuntimeError('Found no valid dmft iteration to copy. Aborting...')
+                elif '/dmft-%03i'%i in oldfile:
+                    iteration = str('%03i'%(i-1))
+                    print('Last dmft iteration in file: ', i )
+                    print('Using dmft iteration: ', i-1)
+                    break
+                else:
+                    pass
+
+        for key_level1 in oldfile.keys():
+            if 'dmft' in key_level1 and key_level1 != ('dmft-'+iteration):
+                pass
+            else:
+                print("{:20}".format(key_level1), oldfile[key_level1])
+                try:
+                    for key_level2 in oldfile[key_level1].keys():
+                        print("  {:18}".format(key_level2), oldfile[key_level1][key_level2])
+                        try:
+                            for key_level3 in oldfile[key_level1][key_level2].keys():
+                                print("    {:16}".format(key_level3), oldfile[key_level1][key_level2][key_level3])
+                                try:
+                                    for key_level4 in oldfile[key_level1][key_level2][key_level3].keys():
+                                        print("      {:14}".format(key_level4), oldfile[key_level1][key_level2][key_level3][key_level4])
+                                except:
+                                    pass
+                        except:
+                            pass
+                except:
+                    pass
+                print("")
+                    
+        for atr in oldfile.attrs.keys():
+            print(oldfile.attrs.get(atr))
+                                          
+print("all done")            

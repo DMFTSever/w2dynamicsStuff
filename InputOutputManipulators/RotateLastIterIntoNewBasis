@@ -45,22 +45,32 @@ with h5py.File(sourcefile,'r') as oldfile:
                     elif '/dmft-%03i'%i in oldfile:
                         iteration = str('%03i'%(i-1))
                         print('Last dmft iteration in file: ', i )
-                        print('Copying dmft iteration: ', i-1)
+                        print('Using dmft iteration: ', i-1)
                         break
                     else:
                         pass
             for key_level1 in oldfile.keys():
                 if 'dmft' in key_level1 and key_level1 != ('dmft-'+iteration):
                     pass
+                elif 'dmft' not in key_level1 and 'finish' not in key_level1 and 'start' not in key_level1:
+                    try:
+                        print(key_level1+" copying")
+                        newfile.copy(source=oldfile[key_level1], dest=key_level1)
+                    except:
+                        newfile.close()
+                        os.remove(destfile)
+                        raise RuntimeError('Could not copy group or dataset: '+str(key_level1))
+
                 else:
                     try:
-                        oldfile[key_level1].copy(source=oldfile[key_level1], dest=newfile)
+                        print(key_level1+" copying (shallow)")
+                        newfile.copy(source=oldfile[key_level1], dest=key_level1, shallow=True)
                     except:
                         newfile.close()
                         os.remove(destfile)
                         raise RuntimeError('Could not copy group or dataset: '+str(key_level1))
                     
-                    ########## rotating everthing #############
+                    ########## rotating quantities and copying rest #############
                     rot_matrix = np.loadtxt(rotMatrix, dtype=complex)
                     inv_rot_matrix = rot_matrix.transpose().conjugate()
                     rot_matrix_per_at = []
@@ -74,43 +84,63 @@ with h5py.File(sourcefile,'r') as oldfile:
                             inv_rot_matrix_per_at.append(rot_matrix_per_at[-1].transpose().conjugate())
                         
                     try:
-                        print(key_level1)
-                        for key_level2 in newfile[key_level1].keys():
+                        for key_level2 in oldfile[key_level1].keys():
                             if "ineq" in key_level2:
+                                print("  "+key_level2)
                                 atom = int(key_level2.split('-')[1].strip("0"))-1
                                 if len(rot_matrix_per_at) < atom+1:
                                     raise RuntimeError("Please specify rotation Matrix for all atoms in the hdf5 file!")
-                                print("  "+key_level2, atom)
-                                for key_level3 in newfile[key_level1][key_level2]:
+                                for key_level3 in oldfile[key_level1][key_level2].keys():
                                     if key_level3 in quant_list:
-                                        print("    "+key_level3, newfile[key_level1][key_level2][key_level3]["value"].shape)
-                                        quant = newfile[key_level1][key_level2][key_level3]["value"][:]
-                                        shape = quant.shape
-                                        if key_level3 != 'smom-full':
-                                            newquant = np.einsum('ab,bck,cd -> adk', inv_rot_matrix_per_at[atom], \
-                                                                 quant.reshape((shape[0]*shape[1],shape[2]*shape[3],shape[4]))\
-                                                                 , rot_matrix_per_at[atom]).reshape(shape)
-                                        else:
-                                            newquant = np.einsum('ab,bck,cd -> adk', inv_rot_matrix_per_at[atom].transpose(), \
-                                                                 quant.reshape((shape[0]*shape[1],shape[2]*shape[3],shape[4]))\
-                                                                 , rot_matrix_per_at[atom].transpose()).reshape(shape)
-                                        print(type(quant), type(newquant))
-                                        print(type(quant[0,0,0,0,0]), type(newquant[0,0,0,0,0]))
-                                        
-
-                                        ########### GO ON HERE: datatype of gtaunew is complex whereas old is float, needs to be changed! delete old dataset an create a new one!)
-                                        newfile[key_level1][key_level2][key_level3]["value"] = newquant[:]
-
-                            elif ("dmft" in key_level1) and (key_level2 in quant_list):
-                                print("  "+key_level2, newfile[key_level1][key_level2]["value"].shape)
-                                quant = newfile[key_level1][key_level2]["value"][:]
-                                shape = quant.shape
-                                newquant = np.einsum('ab,bc,cd -> ad', inv_rot_matrix, \
-                                                     quant.reshape((shape[0]*shape[1],shape[2]*shape[3]))\
-                                                     , rot_matrix).reshape(shape)
-                                print(shape,newquant.shape)
+                                        print("    "+key_level3+" creating group")
+                                        newfile[key_level1][key_level2].create_group(key_level3)
+                                        for atr in oldfile[key_level1][key_level2][key_level3].attrs.keys():
+                                            newfile[key_level1][key_level2][key_level3].attrs.create(atr,oldfile[key_level1][key_level2][key_level3].attrs.get(atr))
+                                        for dataset in oldfile[key_level1][key_level2][key_level3].keys():
+                                            quant = oldfile[key_level1][key_level2][key_level3][dataset][:]
+                                            if np.all(quant==0):
+                                                print('    using diagonal version as input') 
+                                                try:
+                                                    quant_diag = oldfile[key_level1][key_level2][key_level3[:-5]][dataset][:]
+                                                    for i in range(0, quant_diag.shape[0]):
+                                                        for j in range(0, quant_diag.shape[1]):
+                                                            quant[i,j,i,j,:] = quant_diag[i,j,:]
+                                                except:
+                                                    raise RuntimeError('Error loading diagonal version of {}'.format(key_level3))
+                                            shape = quant.shape
+                                            if key_level3 != 'smom-full':
+                                                newquant = np.einsum('ab,bck,cd -> adk', inv_rot_matrix_per_at[atom], \
+                                                                     quant.reshape((shape[0]*shape[1],shape[2]*shape[3],shape[4]))\
+                                                                     , rot_matrix_per_at[atom]).reshape(shape)
+                                            else:
+                                                newquant = np.einsum('ab,bck,cd -> adk', inv_rot_matrix_per_at[atom].transpose(), \
+                                                                     quant.reshape((shape[0]*shape[1],shape[2]*shape[3],shape[4]))\
+                                                                     , rot_matrix_per_at[atom].transpose()).reshape(shape)
+                                            
+                                            print("      "+dataset+" creating rotated dataset")
+                                            newfile[key_level1][key_level2][key_level3].create_dataset(dataset, data=newquant)
+                                            for atr in oldfile[key_level1][key_level2][key_level3][dataset].attrs.keys():
+                                                newfile[key_level1][key_level2][key_level3][dataset].attrs.create(atr,oldfile[key_level1][key_level2][key_level3][dataset].attrs.get(atr))
+                                    else:
+                                        print("    "+key_level3+" copying")
+                                        newfile[key_level1][key_level2].copy(source=oldfile[key_level1][key_level2][key_level3], dest=key_level3)
+                            elif "dc-latt" in key_level2:
+                                print("  "+key_level2)
+                                for dataset in oldfile[key_level1][key_level2].keys():
+                                    quant = oldfile[key_level1][key_level2][dataset][:]
+                                    shape = quant.shape
+                                    newquant = np.einsum('ab,bc,cd -> ad', inv_rot_matrix, \
+                                                         quant.reshape((shape[0]*shape[1],shape[2]*shape[3]))\
+                                                         , rot_matrix).reshape(shape)
+                                    print("    "+dataset+" creating rotated dataset")
+                                    newfile[key_level1][key_level2].create_dataset(dataset, data=newquant)
+                                    for atr in oldfile[key_level1][key_level2][dataset].attrs.keys():
+                                        newfile[key_level1][key_level2][dataset].attrs.create(atr,oldfile[key_level1][key_level2][dataset].attrs.get(atr))
                             else:
                                 print("  "+key_level2)
+                                for key_level3 in oldfile[key_level1][key_level2].keys():
+                                    print("    "+key_level3+" copying")
+                                    newfile[key_level1][key_level2].copy(source=oldfile[key_level1][key_level2][key_level3], dest=key_level3)
                         print("")
                             
                     except:
@@ -121,5 +151,4 @@ with h5py.File(sourcefile,'r') as oldfile:
             for atr in oldfile.attrs.keys():
                 newfile.attrs.create(atr,oldfile.attrs.get(atr))
                                               
-            
-os.remove(destfile)
+print("all done")            
