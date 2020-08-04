@@ -139,8 +139,8 @@ with h5py.File(sourcefile,'r') as oldfile:
                                     newquant = np.einsum('ab,bc,cd -> ad', inv_rot_matrix, \
                                                          quant.reshape((shape[0]*shape[1],shape[2]*shape[3]))\
                                                          , rot_matrix).reshape(shape)
-                                    print("    "+dataset+" creating rotated dataset")
-                                    newfile[key_level1][key_level2].create_dataset(dataset, data=newquant)
+                                    print("    "+dataset+" creating rotated dataset, saving only real part")
+                                    newfile[key_level1][key_level2].create_dataset(dataset, data=newquant.real)
                                     for atr in oldfile[key_level1][key_level2][dataset].attrs.keys():
                                         newfile[key_level1][key_level2][dataset].attrs.create(atr,oldfile[key_level1][key_level2][dataset].attrs.get(atr))
                             else:
