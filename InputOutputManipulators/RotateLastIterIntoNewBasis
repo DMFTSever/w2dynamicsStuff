@@ -22,11 +22,15 @@ parser.add_argument('rotMatrix', help='This is the rotation matrix (U) for the f
                                        is equivalent to rotMatrixAt. Nevertheless, both\
                                        need to be specified')
 parser.add_argument('rotMatrixAt', help='This is the rotation matrix (U) for atom 1...n.', nargs='*') 
+parser.add_argument('-i', '--inverse', action='store_true', default=False,\
+	               help="If this option is set U will be applied in the following way: U*O*U^\dagger.",\
+                   dest='invert')
 args = parser.parse_args()
 sourcefile = args.source
 destfile = args.dest
 rotMatrix = args.rotMatrix
 rotMatrixAt = args.rotMatrixAt
+invert = args.invert
 if sourcefile == destfile:
     raise RuntimeError('Source and destination equal. Please specify another destination.')
 
@@ -71,7 +75,10 @@ with h5py.File(sourcefile,'r') as oldfile:
                         raise RuntimeError('Could not copy group or dataset: '+str(key_level1))
                     
                     ########## rotating quantities and copying rest #############
-                    rot_matrix = np.loadtxt(rotMatrix, dtype=complex)
+                    if invert:
+                        rot_matrix = np.loadtxt(rotMatrix, dtype=complex).transpose().conjugate()
+                    else:
+                        rot_matrix = np.loadtxt(rotMatrix, dtype=complex)
                     inv_rot_matrix = rot_matrix.transpose().conjugate()
                     rot_matrix_per_at = []
                     inv_rot_matrix_per_at = []
