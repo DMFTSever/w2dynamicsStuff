@@ -1,12 +1,13 @@
 from __future__ import print_function, division, absolute_import
 import numpy as np
 import h5py
+import os
 
 def print_hdf5_tree(item):
     if isinstance(f[item], h5py.Group):
-        print item + " -> Group"
+        print(item + " -> Group")
     elif isinstance(f[item], h5py.Dataset):
-        print item + " -> Dataset"
+        print(item + " -> Dataset")
     else:
         pass
 
