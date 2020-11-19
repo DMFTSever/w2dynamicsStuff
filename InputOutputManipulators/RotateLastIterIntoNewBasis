@@ -21,16 +21,17 @@ parser.add_argument('rotMatrix', help='This is the rotation matrix (U) for the f
                                        If the full problem consists of only one atom this\
                                        is equivalent to rotMatrixAt. Nevertheless, both\
                                        need to be specified')
-parser.add_argument('rotMatrixAt', help='This is the rotation matrix (U) for atom 1...n.', nargs='*') 
+parser.add_argument('rotMatrixAt', help='This is the rotation matrix (U) for atom 1...n.', nargs='*')
 parser.add_argument('-i', '--inverse', action='store_true', default=False,\
 	               help="If this option is set U will be applied in the following way: U*O*U^\dagger.",\
                    dest='invert')
-args = parser.parse_args()
-sourcefile = args.source
-destfile = args.dest
-rotMatrix = args.rotMatrix
+args        = parser.parse_args()
+sourcefile  = args.source
+destfile    = args.dest
+rotMatrix   = args.rotMatrix
 rotMatrixAt = args.rotMatrixAt
-invert = args.invert
+invert      = args.invert
+
 if sourcefile == destfile:
     raise RuntimeError('Source and destination equal. Please specify another destination.')
 
@@ -73,7 +74,7 @@ with h5py.File(sourcefile,'r') as oldfile:
                         newfile.close()
                         os.remove(destfile)
                         raise RuntimeError('Could not copy group or dataset: '+str(key_level1))
-                    
+
                     ########## rotating quantities and copying rest #############
                     if invert:
                         rot_matrix = np.loadtxt(rotMatrix, dtype=complex).transpose().conjugate()
@@ -87,9 +88,12 @@ with h5py.File(sourcefile,'r') as oldfile:
                         inv_rot_matrix_per_at.append(inv_rot_matrix)
                     else:
                         for element in rotMatrixAt:
-                            rot_matrix_per_at.append(np.loadtxt(element, dtype=complex))
+                            if invert:
+                                rot_matrix_per_at.append(np.loadtxt(element, dtype=complex).transpose().conjugate())
+                            else:
+                                rot_matrix_per_at.append(np.loadtxt(element, dtype=complex))
                             inv_rot_matrix_per_at.append(rot_matrix_per_at[-1].transpose().conjugate())
-                        
+
                     try:
                         for key_level2 in oldfile[key_level1].keys():
                             if "ineq" in key_level2:
@@ -106,7 +110,7 @@ with h5py.File(sourcefile,'r') as oldfile:
                                         for dataset in oldfile[key_level1][key_level2][key_level3].keys():
                                             quant = oldfile[key_level1][key_level2][key_level3][dataset][:]
                                             if np.all(quant==0):
-                                                print('    using diagonal version as input') 
+                                                print('    using diagonal version as input')
                                                 try:
                                                     quant_diag = oldfile[key_level1][key_level2][key_level3[:-5]][dataset][:]
                                                     for i in range(0, quant_diag.shape[0]):
@@ -123,7 +127,7 @@ with h5py.File(sourcefile,'r') as oldfile:
                                                 newquant = np.einsum('ab,bck,cd -> adk', inv_rot_matrix_per_at[atom].transpose(), \
                                                                      quant.reshape((shape[0]*shape[1],shape[2]*shape[3],shape[4]))\
                                                                      , rot_matrix_per_at[atom].transpose()).reshape(shape)
-                                            
+
                                             print("      "+dataset+" creating rotated dataset")
                                             newfile[key_level1][key_level2][key_level3].create_dataset(dataset, data=newquant)
                                             for atr in oldfile[key_level1][key_level2][key_level3][dataset].attrs.keys():
@@ -149,13 +153,13 @@ with h5py.File(sourcefile,'r') as oldfile:
                                     print("    "+key_level3+" copying")
                                     newfile[key_level1][key_level2].copy(source=oldfile[key_level1][key_level2][key_level3], dest=key_level3)
                         print("")
-                            
+
                     except:
                         newfile.close()
                         os.remove(destfile)
                         raise RuntimeError("Rotation process went wrong.")
-                    
+
             for atr in oldfile.attrs.keys():
                 newfile.attrs.create(atr,oldfile.attrs.get(atr))
-                                              
-print("all done")            
+
+print("all done")
