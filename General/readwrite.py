@@ -169,11 +169,11 @@ def write_umatrix(filename, umatrix, spin):
 	if not spin:
 		for index, value in np.ndenumerate(umatrix):
 			if value != 0.:
-				f.write("%i %i %i %i  %010.10f\n"%(index[0]+1,index[1]+1,index[2]+1,index[3]+1, value))
+				f.write("%i %i %i %i  %016.16f\n"%(index[0]+1,index[1]+1,index[2]+1,index[3]+1, value))
 	else:
 		for index, value in np.ndenumerate(umatrix):
 			if value != 0:
-				f.write("%s %s %s %s  %010.10f\n"%(str(index[0]+1)+spindict[index[1]],str(index[2]+1)+spindict[index[3]],\
+				f.write("%s %s %s %s  %016.16f\n"%(str(index[0]+1)+spindict[index[1]],str(index[2]+1)+spindict[index[3]],\
 							    str(index[4]+1)+spindict[index[5]],str(index[6]+1)+spindict[index[7]],value))
 		
 
