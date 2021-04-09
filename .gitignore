@@ -2,6 +2,7 @@
 
 #python complied files
 *.pyc
+*.swp
 
 #tesfile
 test.py
