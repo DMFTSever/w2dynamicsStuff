@@ -3,6 +3,7 @@
 # python complied files
 *.pyc
 *.swp
+*__pycache/
 
 # tagfiles
 .tags
