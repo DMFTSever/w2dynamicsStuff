@@ -1,8 +1,12 @@
-#files ignored by git
+# files ignored by git
 
-#python complied files
+# python complied files
 *.pyc
 *.swp
 
-#tesfile
+# tagfiles
+.tags
+tags
+
+# testfile
 test.py
