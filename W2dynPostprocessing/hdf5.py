@@ -312,116 +312,116 @@ class W2dynfile():
 
         return val
 
-    def get_giw(self, atom, iterations, niw='all', get_ax=False,
+    def get_giw(self, atom, iterations='all', niw='all', get_ax=False,
                  stat_iter=False):
 
         return self.get_iw(quant='giw', atom=atom, iterations=iterations,
                            niw=niw, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_giwfull(self, atom, iterations, niw='all', get_ax=False,
+    def get_giwfull(self, atom, iterations='all', niw='all', get_ax=False,
                     stat_iter=False):
 
         return self.get_iw(quant='giw-full', atom=atom, iterations=iterations,
                            niw=niw, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_g0iw(self, atom, iterations, niw='all', get_ax=False,
+    def get_g0iw(self, atom, iterations='all', niw='all', get_ax=False,
                  stat_iter=False):
 
         return self.get_iw(quant='g0iw', atom=atom, iterations=iterations,
                            niw=niw, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_g0iwfull(self, atom, iterations, niw='all', get_ax=False,
+    def get_g0iwfull(self, atom, iterations='all', niw='all', get_ax=False,
                      stat_iter=False):
 
         return self.get_iw(quant='g0iwfull', atom=atom, iterations=iterations,
                            niw=niw, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_fiw(self, atom, iterations, niw='all', get_ax=False,
+    def get_fiw(self, atom, iterations='all', niw='all', get_ax=False,
                  stat_iter=False):
 
         return self.get_iw(quant='fiw', atom=atom, iterations=iterations,
                            niw=niw, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_fiwfull(self, atom, iterations, niw='all', get_ax=False,
+    def get_fiwfull(self, atom, iterations='all', niw='all', get_ax=False,
                     stat_iter=False):
 
         return self.get_iw(quant='fiw-full', atom=atom, iterations=iterations,
                            niw=niw, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_siw(self, atom, iterations, niw='all', get_ax=False,
+    def get_siw(self, atom, iterations='all', niw='all', get_ax=False,
                  stat_iter=False):
 
         return self.get_iw(quant='siw', atom=atom, iterations=iterations,
                            niw=niw, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_siwfull(self, atom, iterations, niw='all', get_ax=False,
+    def get_siwfull(self, atom, iterations='all', niw='all', get_ax=False,
                     stat_iter=False):
 
         return self.get_iw(quant='siw-full', atom=atom, iterations=iterations,
                            niw=niw, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_g4iw(self, atom, iterations, niw='all', get_ax=False,
+    def get_g4iw(self, atom, iterations='all', niw='all', get_ax=False,
                  stat_iter=False):
 
         return self.get_iw(quant='g4iw', atom=atom, iterations=iterations,
                            niw=niw, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_g4iwpp(self, atom, iterations, niw='all', get_ax=False,
+    def get_g4iwpp(self, atom, iterations='all', niw='all', get_ax=False,
                    stat_iter=False):
 
         return self.get_iw(quant='g4iw-pp', atom=atom, iterations=iterations,
                            niw=niw, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_gtau(self, atom, iterations, ntau='all', get_ax=False,
+    def get_gtau(self, atom, iterations='all', ntau='all', get_ax=False,
                  stat_iter=False):
 
         return self.get_tau(quant='gtau', atom=atom, iterations=iterations,
                             ntau=ntau, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_gtaufull(self, atom, iterations, ntau='all', get_ax=False,
+    def get_gtaufull(self, atom, iterations='all', ntau='all', get_ax=False,
                      stat_iter=False):
 
         return self.get_tau(quant='gtau-full', atom=atom, iterations=iterations,
                             ntau=ntau, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_ftau(self, atom, iterations, ntau='all', get_ax=False,
+    def get_ftau(self, atom, iterations='all', ntau='all', get_ax=False,
                  stat_iter=False):
 
         return self.get_tau(quant='ftau', atom=atom, iterations=iterations,
                             ntau=ntau, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_ftaufull(self, atom, iterations, ntau='all', get_ax=False,
+    def get_ftaufull(self, atom, iterations='all', ntau='all', get_ax=False,
                      stat_iter=False):
 
         return self.get_tau(quant='ftau-full', atom=atom, iterations=iterations,
                             ntau=ntau, get_ax=get_ax, stat_iter=stat_iter)
 
-    def get_occ(self, atom, iterations, stat_iter=False):
+    def get_occ(self, atom, iterations='all', stat_iter=False):
 
         return self.get_noax(quant='occ', atom=atom, iterations=iterations,
                              stat_iter=stat_iter)
 
-    def get_rho1(self, atom, iterations, stat_iter=False):
+    def get_rho1(self, atom, iterations='all', stat_iter=False):
 
         return self.get_noax(quant='rho1', atom=atom, iterations=iterations,
                              stat_iter=stat_iter)
 
-    def get_rho2(self, atom, iterations, stat_iter=False):
+    def get_rho2(self, atom, iterations='all', stat_iter=False):
 
         return self.get_noax(quant='rho2', atom=atom, iterations=iterations,
                              stat_iter=stat_iter)
 
-    def get_dc(self, atom, iterations, stat_iter=False):
+    def get_dc(self, atom, iterations='all', stat_iter=False):
 
         return self.get_noax(quant='dc', atom=atom, iterations=iterations,
                              stat_iter=stat_iter)
 
-    def get_muimp(self, atom, iterations, stat_iter=False):
+    def get_muimp(self, atom, iterations='all', stat_iter=False):
 
         return self.get_noax(quant='muimp', atom=atom,
                              iterations=iterations, stat_iter=stat_iter)
 
-    def get_muimpfull(self, atom, iterations, stat_iter=False):
+    def get_muimpfull(self, atom, iterations='all', stat_iter=False):
 
         return self.get_noax(quant='muimp-full', atom=atom,
                              iterations=iterations, stat_iter=stat_iter)
@@ -448,6 +448,12 @@ class W2dynfile():
             return ax, result
         else:
             return result
+
+    def get_beta(self):
+        return self.file['/.config'].attrs.get('general.beta')
+
+    def check_for_statiter(self):
+        return self.laststatiter > 0
 
 
 def atomloop(function, atoms, **args):
